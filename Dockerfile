@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM debian:bullseye
 
 RUN set -x \
 
@@ -54,17 +54,9 @@ RUN set -x \
 
  && ./configure CFLAGS="-O2 -march=native" --with-crypto --with-curl \
 
- && make install \
+ && make install -j 4 \
 
-    # Install dumb-init (avoid PID 1 issues).
-
-    # https://github.com/Yelp/dumb-init
-
- && DUMP_INIT_URI=$(curl -L https://github.com/Yelp/dumb-init/releases/latest | grep -Po '(?<=href=")[^"]+_amd64(?=")') \
-
- && curl -Lo /usr/local/bin/dumb-init "https://github.com/$DUMP_INIT_URI" \
-
- && chmod +x /usr/local/bin/dumb-init \
+    # 
 
     # Clean-up
 
@@ -107,11 +99,6 @@ RUN set -x \
  && cpuminer --version
 
 WORKDIR /cpuminer
-
 COPY config.json /cpuminer
-
 EXPOSE 80
-
-ENTRYPOINT ["dumb-init"]
-
 CMD ["cpuminer", "--config=config.json"]
